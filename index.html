@@ -569,13 +569,29 @@ button:disabled{
 
       <div
         class="summary-number"
+        id="submitted-summary"
+      >
+        -
+      </div>
+
+      <div class="summary-label">
+        提出済み人数
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <div
+        class="summary-number"
         id="answered-summary"
       >
         -
       </div>
 
       <div class="summary-label">
-        回答済み人数
+        回答があった対象人数
       </div>
 
     </div>
@@ -605,6 +621,44 @@ button:disabled{
       最新情報に更新
     </button>
 
+
+  </div>
+
+
+  <div
+    class="number-card"
+    id="unsubmitted-card"
+  >
+
+    <div class="number-header">
+
+      <div class="number-title">
+
+        <span class="number-badge">
+          未提出
+        </span>
+
+        <span
+          class="number-status incomplete"
+          id="unsubmitted-count"
+        >
+          -
+        </span>
+
+      </div>
+
+    </div>
+
+    <div
+      class="responses open"
+      id="unsubmitted-list"
+    >
+
+      <div class="loading">
+        読み込み中…
+      </div>
+
+    </div>
 
   </div>
 
@@ -760,7 +814,10 @@ async function login(){
       "block";
 
 
-    await loadResults();
+    await Promise.all([
+      loadResults(),
+      loadSubmissionStatus()
+    ]);
 
 
   }catch(err){
@@ -782,6 +839,126 @@ async function login(){
 
     button.textContent =
       "管理画面を開く";
+
+  }
+
+}
+
+
+/* ============================================================
+ * 提出状況（誰が提出したか／していないか）
+ * ============================================================ */
+
+async function loadSubmissionStatus(){
+
+  const listArea =
+    document.getElementById(
+      "unsubmitted-list"
+    );
+
+
+  try{
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "get_submission_status",
+        {
+          p_password:
+            adminPassword
+        }
+      );
+
+
+    if(error){
+
+      throw error;
+
+    }
+
+
+    if(!Array.isArray(data)){
+
+      throw new Error(
+        "データ形式が正しくありません。"
+      );
+
+    }
+
+
+    const submittedCount =
+      data.filter(
+        r => r.submitted
+      ).length;
+
+
+    document.getElementById(
+      "submitted-summary"
+    ).textContent =
+      `${submittedCount} / ${data.length}`;
+
+
+    const unsubmitted =
+      data.filter(
+        r => !r.submitted
+      );
+
+
+    document.getElementById(
+      "unsubmitted-count"
+    ).textContent =
+      `${unsubmitted.length} 人`;
+
+
+    listArea.innerHTML =
+
+      unsubmitted.length === 0
+
+        ?
+
+        `
+
+          <div class="no-response">
+            全員提出済みです。
+          </div>
+
+        `
+
+        :
+
+        unsubmitted
+          .map(
+            r =>
+
+              `
+
+                <div class="response">
+
+                  ${escapeHtml(r.number)}番　${escapeHtml(r.name)}
+
+                </div>
+
+              `
+
+          )
+          .join("");
+
+
+  }catch(err){
+
+    console.error(err);
+
+
+    listArea.innerHTML = `
+
+      <div class="error">
+        提出状況の取得に失敗しました。
+      </div>
+
+    `;
 
   }
 
@@ -1245,7 +1422,12 @@ document
   )
   .addEventListener(
     "click",
-    loadResults
+    () => {
+
+      loadResults();
+      loadSubmissionStatus();
+
+    }
   );
 
 
@@ -1277,4 +1459,3 @@ document
 </body>
 
 </html>
-
