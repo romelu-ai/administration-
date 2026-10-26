@@ -1,1271 +1,418 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>アンケート管理画面</title>
-
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
-  rel="stylesheet"
->
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-
 <style>
-
-:root{
-
-  --paper:#F6F1E6;
-  --paper-line:#DCD2BB;
-  --ink:#23282E;
-  --ink-soft:#5B5647;
-  --stamp:#B23A2E;
-  --stamp-soft:#E9D9CE;
-  --ok:#55684A;
-
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
-
-  margin:0;
-  padding:0;
-
-}
-
-body{
-
-  background:var(--paper);
-  color:var(--ink);
-
-  font-family:
-    'Zen Kaku Gothic New',
-    sans-serif;
-
-  line-height:1.7;
-
-  min-height:100vh;
-
-}
-
-.wrap{
-
-  max-width:800px;
-
-  margin:0 auto;
-
-  padding:40px 20px 80px;
-
-}
-
-header{
-
-  border-bottom:
-    1px solid var(--paper-line);
-
-  padding-bottom:20px;
-
-  margin-bottom:30px;
-
-}
-
-h1{
-
-  font-family:
-    'Shippori Mincho',
-    serif;
-
-  font-size:26px;
-
-  margin:0 0 8px;
-
-}
-
-.lead{
-
-  color:var(--ink-soft);
-
-  font-size:14px;
-
-  margin:0;
-
-}
-
-
-/* ============================================================
-   ログイン
-   ============================================================ */
-
-.login-card{
-
-  background:#fff;
-
-  border:
-    1px solid var(--paper-line);
-
-  padding:30px 24px;
-
-  max-width:500px;
-
-  margin:40px auto;
-
-}
-
-.login-card label{
-
-  display:block;
-
-  font-size:14px;
-
-  font-weight:700;
-
-  margin-bottom:7px;
-
-}
-
-input[type=password]{
-
-  width:100%;
-
-  font-family:inherit;
-
-  font-size:16px;
-
-  padding:11px 12px;
-
-  background:var(--paper);
-
-  border:
-    1px solid var(--paper-line);
-
-  border-radius:2px;
-
-}
-
-input:focus{
-
-  outline:
-    2px solid var(--stamp);
-
-  outline-offset:-1px;
-
-}
-
-button{
-
-  font-family:inherit;
-
-  font-size:15px;
-
-  font-weight:700;
-
-  color:#fff;
-
-  background:var(--stamp);
-
-  border:none;
-
-  border-radius:2px;
-
-  padding:12px 28px;
-
-  cursor:pointer;
-
-}
-
-button:disabled{
-
-  background:#B9AFA0;
-
-  cursor:not-allowed;
-
-}
-
-.login-button{
-
-  margin-top:20px;
-
-  width:100%;
-
-}
-
-.error{
-
-  color:var(--stamp);
-
-  font-size:13px;
-
-  margin-top:12px;
-
-}
-
-
-/* ============================================================
-   管理画面
-   ============================================================ */
-
-#admin-area{
-
-  display:none;
-
-}
-
-.summary{
-
-  background:#fff;
-
-  border:
-    1px solid var(--paper-line);
-
-  padding:20px;
-
-  margin-bottom:25px;
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  gap:20px;
-
-}
-
-.summary-number{
-
-  font-family:
-    'Shippori Mincho',
-    serif;
-
-  font-size:30px;
-
-  font-weight:700;
-
-  color:var(--stamp);
-
-}
-
-.summary-label{
-
-  color:var(--ink-soft);
-
-  font-size:13px;
-
-}
-
-.refresh-button{
-
-  background:var(--ok);
-
-  padding:9px 18px;
-
-  font-size:13px;
-
-}
-
-
-/* ============================================================
-   番号一覧
-   ============================================================ */
-
-.number-card{
-
-  background:#fff;
-
-  border:
-    1px solid var(--paper-line);
-
-  margin-bottom:14px;
-
-}
-
-.number-header{
-
-  padding:16px 18px;
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  cursor:pointer;
-
-}
-
-.number-header:hover{
-
-  background:#FCFAF5;
-
-}
-
-.number-title{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-}
-
-.number-badge{
-
-  color:var(--stamp);
-
-  background:var(--stamp-soft);
-
-  padding:3px 10px;
-
-  font-family:
-    'Shippori Mincho',
-    serif;
-
-  font-weight:700;
-
-}
-
-.number-status{
-
-  font-size:13px;
-
-  color:var(--ink-soft);
-
-}
-
-.number-status.complete{
-
-  color:var(--ok);
-
-  font-weight:700;
-
-}
-
-.number-status.incomplete{
-
-  color:var(--stamp);
-
-}
-
-.arrow{
-
-  font-size:13px;
-
-  color:var(--ink-soft);
-
-}
-
-.responses{
-
-  display:none;
-
-  border-top:
-    1px dashed var(--paper-line);
-
-  padding:18px;
-
-}
-
-.responses.open{
-
-  display:block;
-
-}
-
-
-/* ============================================================
-   回答
-   ============================================================ */
-
-.response{
-
-  background:var(--paper);
-
-  border:
-    1px solid var(--paper-line);
-
-  padding:18px;
-
-  margin-bottom:14px;
-
-}
-
-.response:last-child{
-
-  margin-bottom:0;
-
-}
-
-.response-number{
-
-  font-size:12px;
-
-  color:var(--ink-soft);
-
-  margin-bottom:10px;
-
-}
-
-.question{
-
-  font-weight:700;
-
-  font-size:13px;
-
-  margin-top:12px;
-
-}
-
-.answer{
-
-  white-space:pre-wrap;
-
-  font-size:14px;
-
-  margin-top:3px;
-
-}
-
-.date{
-
-  color:var(--ink-soft);
-
-  font-size:11px;
-
-  margin-top:14px;
-
-}
-
-.no-response{
-
-  color:var(--ink-soft);
-
-  font-size:13px;
-
-}
-
-.loading{
-
-  text-align:center;
-
-  padding:50px;
-
-  color:var(--ink-soft);
-
-}
-
-.hidden{
-
-  display:none;
-
-}
-
-@media(max-width:600px){
-
-  .summary{
-
-    align-items:flex-start;
-
-    flex-direction:column;
-
-  }
-
-}
-
+:root{--paper:#F6F1E6;--paper-line:#DCD2BB;--ink:#23282E;--ink-soft:#5B5647;--stamp:#B23A2E;--stamp-soft:#E9D9CE;--ok:#55684A}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Zen Kaku Gothic New',sans-serif;line-height:1.7;min-height:100vh}
+.wrap{max-width:800px;margin:0 auto;padding:40px 20px 80px}
+header{border-bottom:1px solid var(--paper-line);padding-bottom:20px;margin-bottom:30px}
+h1{font-family:'Shippori Mincho',serif;font-size:26px;margin:0 0 8px}
+.lead{color:var(--ink-soft);font-size:14px;margin:0}
+
+/* ログイン */
+.login-card{background:#fff;border:1px solid var(--paper-line);padding:30px 24px;max-width:500px;margin:40px auto}
+.login-card label{display:block;font-size:14px;font-weight:700;margin-bottom:7px}
+input[type=password]{width:100%;font-family:inherit;font-size:16px;padding:11px 12px;background:var(--paper);border:1px solid var(--paper-line);border-radius:2px}
+input:focus{outline:2px solid var(--stamp);outline-offset:-1px}
+button{font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--stamp);border:none;border-radius:2px;padding:12px 28px;cursor:pointer}
+button:disabled{background:#B9AFA0;cursor:not-allowed}
+.login-button{margin-top:20px;width:100%}
+.error{color:var(--stamp);font-size:13px;margin-top:12px}
+
+/* 管理画面 */
+#admin-area{display:none}
+.summary{background:#fff;border:1px solid var(--paper-line);padding:20px;margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.summary-number{font-family:'Shippori Mincho',serif;font-size:30px;font-weight:700;color:var(--stamp)}
+.summary-label{color:var(--ink-soft);font-size:13px}
+.refresh-button{background:var(--ok);padding:9px 18px;font-size:13px}
+
+/* 番号一覧 */
+.number-card{background:#fff;border:1px solid var(--paper-line);margin-bottom:14px}
+.number-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.number-header:hover{background:#FCFAF5}
+.number-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.number-badge{color:var(--stamp);background:var(--stamp-soft);padding:3px 10px;font-family:'Shippori Mincho',serif;font-weight:700}
+.number-status{font-size:13px;color:var(--ink-soft)}
+.number-status.complete{color:var(--ok);font-weight:700}
+.number-status.incomplete{color:var(--stamp)}
+.arrow{font-size:13px;color:var(--ink-soft)}
+.responses{display:none;border-top:1px dashed var(--paper-line);padding:18px}
+.responses.open{display:block}
+
+/* 回答 */
+.response{background:var(--paper);border:1px solid var(--paper-line);padding:18px;margin-bottom:14px}
+.response:last-child{margin-bottom:0}
+.response-number{font-size:12px;color:var(--ink-soft);margin-bottom:10px}
+.question{font-weight:700;font-size:13px;margin-top:12px}
+.answer{white-space:pre-wrap;font-size:14px;margin-top:3px}
+.date{color:var(--ink-soft);font-size:11px;margin-top:14px}
+.no-response{color:var(--ink-soft);font-size:13px}
+.loading{text-align:center;padding:50px;color:var(--ink-soft)}
+.hidden{display:none}
+
+/* 本人が選んだ部分 */
+.picked{background:#fff;border:1px solid var(--paper-line);border-left:3px solid var(--ok);padding:12px 14px;margin-bottom:14px}
+.picked-title{font-size:13px;font-weight:700;color:var(--ok);margin-bottom:8px}
+.picked-item{font-size:14px;margin-top:6px}
+.picked-field{display:block;font-size:11.5px;color:var(--ink-soft)}
+mark{background:#DDE8CF;color:inherit;box-shadow:0 2px 0 var(--ok)}
+
+@media(max-width:600px){.summary{align-items:flex-start;flex-direction:column}}
 </style>
-
 </head>
 
-
 <body>
-
-
 <div class="wrap">
 
-
 <header>
-
   <h1>アンケート管理画面</h1>
-
-  <p class="lead">
-    番号ごとの回答状況と回答内容を確認できます。
-  </p>
-
+  <p class="lead">番号ごとの回答状況と回答内容、本人が選んだ部分を確認できます。</p>
 </header>
 
-
-<!-- ==========================================================
-     ログイン画面
-     ========================================================== -->
-
+<!-- ログイン画面 -->
 <div id="login-area">
-
-
   <div class="login-card">
-
-
-    <label for="admin-password">
-      管理者パスワード
-    </label>
-
-
-    <input
-      type="password"
-      id="admin-password"
-      autocomplete="off"
-    >
-
-
-    <button
-      type="button"
-      class="login-button"
-      id="login-button"
-    >
-      管理画面を開く
-    </button>
-
-
-    <div
-      class="error"
-      id="login-error"
-      style="display:none;"
-    ></div>
-
-
+    <label for="admin-password">管理者パスワード</label>
+    <input type="password" id="admin-password" autocomplete="off">
+    <button type="button" class="login-button" id="login-button">管理画面を開く</button>
+    <div class="error" id="login-error" style="display:none;"></div>
   </div>
-
 </div>
 
-
-<!-- ==========================================================
-     管理画面
-     ========================================================== -->
-
+<!-- 管理画面 -->
 <div id="admin-area">
 
-
   <div class="summary">
-
-
     <div>
-
-      <div
-        class="summary-number"
-        id="submitted-summary"
-      >
-        -
-      </div>
-
-      <div class="summary-label">
-        提出済み人数
-      </div>
-
+      <div class="summary-number" id="submitted-summary">-</div>
+      <div class="summary-label">提出済み人数</div>
     </div>
-
-
     <div>
-
-      <div
-        class="summary-number"
-        id="answered-summary"
-      >
-        -
-      </div>
-
-      <div class="summary-label">
-        回答があった対象人数
-      </div>
-
+      <div class="summary-number" id="answered-summary">-</div>
+      <div class="summary-label">回答があった対象人数</div>
     </div>
-
-
     <div>
-
-      <div
-        class="summary-number"
-        id="response-total"
-      >
-        -
-      </div>
-
-      <div class="summary-label">
-        回答総数
-      </div>
-
+      <div class="summary-number" id="response-total">-</div>
+      <div class="summary-label">回答総数</div>
     </div>
-
-
-    <button
-      type="button"
-      class="refresh-button"
-      id="refresh-button"
-    >
-      最新情報に更新
-    </button>
-
-
+    <button type="button" class="refresh-button" id="refresh-button">最新情報に更新</button>
   </div>
 
-
-  <div
-    class="number-card"
-    id="unsubmitted-card"
-  >
-
+  <div class="number-card" id="unsubmitted-card">
     <div class="number-header">
-
       <div class="number-title">
-
-        <span class="number-badge">
-          未提出
-        </span>
-
-        <span
-          class="number-status incomplete"
-          id="unsubmitted-count"
-        >
-          -
-        </span>
-
+        <span class="number-badge">未提出</span>
+        <span class="number-status incomplete" id="unsubmitted-count">-</span>
       </div>
-
     </div>
-
-    <div
-      class="responses open"
-      id="unsubmitted-list"
-    >
-
-      <div class="loading">
-        読み込み中…
-      </div>
-
+    <div class="responses open" id="unsubmitted-list">
+      <div class="loading">読み込み中…</div>
     </div>
-
   </div>
 
-
-  <div
-    id="results-area"
-  >
-
-    <div class="loading">
-      読み込み中…
-    </div>
-
+  <div id="results-area">
+    <div class="loading">読み込み中…</div>
   </div>
 
-
 </div>
-
-
 </div>
-
 
 <script>
 
+/* Supabase */
 
-/* ============================================================
- * Supabase
- * ============================================================ */
-
-const SUPABASE_URL =
-  "https://tqvemvvimtsnrmohelnm.supabase.co";
-
-
-const SUPABASE_ANON_KEY =
-  "sb_publishable_TRfm7gxQ7Sdh_8CX85smDw_TG4akfdj";
-
+const SUPABASE_URL = "https://tqvemvvimtsnrmohelnm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_TRfm7gxQ7Sdh_8CX85smDw_TG4akfdj";
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+  window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
-/* ============================================================
- * 現在のパスワード
- * ============================================================ */
+/* 現在のパスワード */
 
 let adminPassword = "";
 
 
-/* ============================================================
- * ログイン
- * ============================================================ */
+/* 本人が選んだ部分（番号 → 一覧） */
+
+let selectionsByNumber = {};
+let selectionsFailed = false;
+
+const FIELD_LABELS = {
+  impression:"この人の印象",
+  goodpoint:"良いところ・すごいと思うところ",
+  message:"一言メッセージ"
+};
+
+
+/* ログイン */
 
 async function login(){
 
   const password =
-    document
-      .getElementById(
-        "admin-password"
-      )
-      .value
-      .trim();
+    document.getElementById("admin-password").value.trim();
 
+  const errorBox = document.getElementById("login-error");
+  const button = document.getElementById("login-button");
 
-  const errorBox =
-    document.getElementById(
-      "login-error"
-    );
-
-
-  const button =
-    document.getElementById(
-      "login-button"
-    );
-
-
-  errorBox.style.display =
-    "none";
-
+  errorBox.style.display = "none";
 
   if(!password){
-
-    errorBox.textContent =
-      "パスワードを入力してください。";
-
-    errorBox.style.display =
-      "block";
-
+    errorBox.textContent = "パスワードを入力してください。";
+    errorBox.style.display = "block";
     return;
-
   }
 
-
-  button.disabled =
-    true;
-
-
-  button.textContent =
-    "確認中…";
-
+  button.disabled = true;
+  button.textContent = "確認中…";
 
   try{
 
+    const { data, error } =
+      await supabaseClient.rpc("verify_survey_password", { p_password:password });
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "verify_survey_password",
-        {
-          p_password:password
-        }
-      );
-
-
-    if(error){
-
-      throw error;
-
-    }
-
+    if(error){ throw error; }
 
     if(data !== true){
-
-      errorBox.textContent =
-        "パスワードが正しくありません。";
-
-      errorBox.style.display =
-        "block";
-
+      errorBox.textContent = "パスワードが正しくありません。";
+      errorBox.style.display = "block";
       return;
-
     }
 
-
     /* パスワードを一時的に保持 */
+    adminPassword = password;
 
-    adminPassword =
-      password;
+    document.getElementById("login-area").style.display = "none";
+    document.getElementById("admin-area").style.display = "block";
 
-
-    document.getElementById(
-      "login-area"
-    ).style.display =
-      "none";
-
-
-    document.getElementById(
-      "admin-area"
-    ).style.display =
-      "block";
-
-
-    await Promise.all([
-      loadResults(),
-      loadSubmissionStatus()
-    ]);
-
+    await Promise.all([ loadResults(), loadSubmissionStatus() ]);
 
   }catch(err){
 
     console.error(err);
-
-
-    errorBox.textContent =
-      "ログインに失敗しました。";
-
-    errorBox.style.display =
-      "block";
-
+    errorBox.textContent = "ログインに失敗しました。";
+    errorBox.style.display = "block";
 
   }finally{
 
-    button.disabled =
-      false;
-
-    button.textContent =
-      "管理画面を開く";
+    button.disabled = false;
+    button.textContent = "管理画面を開く";
 
   }
 
 }
 
 
-/* ============================================================
- * 提出状況（誰が提出したか／していないか）
- * ============================================================ */
+/* 提出状況（誰が提出したか／していないか） */
 
 async function loadSubmissionStatus(){
 
-  const listArea =
-    document.getElementById(
-      "unsubmitted-list"
-    );
-
+  const listArea = document.getElementById("unsubmitted-list");
 
   try{
 
+    const { data, error } =
+      await supabaseClient.rpc("get_submission_status", { p_password:adminPassword });
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "get_submission_status",
-        {
-          p_password:
-            adminPassword
-        }
-      );
-
-
-    if(error){
-
-      throw error;
-
-    }
-
+    if(error){ throw error; }
 
     if(!Array.isArray(data)){
-
-      throw new Error(
-        "データ形式が正しくありません。"
-      );
-
+      throw new Error("データ形式が正しくありません。");
     }
 
+    const submittedCount = data.filter(r => r.submitted).length;
 
-    const submittedCount =
-      data.filter(
-        r => r.submitted
-      ).length;
-
-
-    document.getElementById(
-      "submitted-summary"
-    ).textContent =
+    document.getElementById("submitted-summary").textContent =
       `${submittedCount} / ${data.length}`;
 
+    const unsubmitted = data.filter(r => !r.submitted);
 
-    const unsubmitted =
-      data.filter(
-        r => !r.submitted
-      );
-
-
-    document.getElementById(
-      "unsubmitted-count"
-    ).textContent =
+    document.getElementById("unsubmitted-count").textContent =
       `${unsubmitted.length} 人`;
 
-
     listArea.innerHTML =
-
       unsubmitted.length === 0
-
-        ?
-
-        `
-
-          <div class="no-response">
-            全員提出済みです。
-          </div>
-
-        `
-
-        :
-
-        unsubmitted
-          .map(
-            r =>
-
-              `
-
-                <div class="response">
-
-                  ${escapeHtml(r.number)}番　${escapeHtml(r.name)}
-
-                </div>
-
-              `
-
-          )
-          .join("");
-
+        ? `<div class="no-response">全員提出済みです。</div>`
+        : unsubmitted
+            .map(r => `<div class="response">${escapeHtml(r.number)}番　${escapeHtml(r.name)}</div>`)
+            .join("");
 
   }catch(err){
 
     console.error(err);
-
-
-    listArea.innerHTML = `
-
-      <div class="error">
-        提出状況の取得に失敗しました。
-      </div>
-
-    `;
+    listArea.innerHTML = `<div class="error">提出状況の取得に失敗しました。</div>`;
 
   }
 
 }
 
 
-/* ============================================================
- * 回答データ取得
- * ============================================================ */
+/* 回答データ取得（回答と、本人が選んだ部分を同時に読む） */
 
 async function loadResults(){
 
-  const resultsArea =
-    document.getElementById(
-      "results-area"
-    );
+  const resultsArea = document.getElementById("results-area");
 
-
-  resultsArea.innerHTML = `
-
-    <div class="loading">
-      回答を読み込んでいます…
-    </div>
-
-  `;
-
+  resultsArea.innerHTML = `<div class="loading">回答を読み込んでいます…</div>`;
 
   try{
 
+    const [res, sel] = await Promise.all([
+      supabaseClient.rpc("get_survey_results",    { p_password:adminPassword }),
+      supabaseClient.rpc("get_survey_selections", { p_password:adminPassword })
+    ]);
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "get_survey_results",
-        {
-          p_password:
-            adminPassword
-        }
-      );
+    if(res.error){ throw res.error; }
 
-
-    if(error){
-
-      throw error;
-
+    if(!Array.isArray(res.data)){
+      throw new Error("データ形式が正しくありません。");
     }
 
+    selectionsByNumber = {};
+    selectionsFailed = false;
 
-    if(!Array.isArray(data)){
-
-      throw new Error(
-        "データ形式が正しくありません。"
-      );
-
+    if(sel.error || !Array.isArray(sel.data)){
+      console.error(sel.error);
+      selectionsFailed = true;
+    }else{
+      sel.data.forEach(r => {
+        (selectionsByNumber[r.number] ||= []).push(r);
+      });
     }
 
-
-    renderResults(data);
-
+    renderResults(res.data);
 
   }catch(err){
 
     console.error(err);
-
-
-    resultsArea.innerHTML = `
-
-      <div class="error">
-        回答の取得に失敗しました。
-      </div>
-
-    `;
+    resultsArea.innerHTML = `<div class="error">回答の取得に失敗しました。</div>`;
 
   }
 
 }
 
 
-/* ============================================================
- * 回答表示
- * ============================================================ */
+/* 回答表示 */
 
 function renderResults(data){
 
-  const resultsArea =
-    document.getElementById(
-      "results-area"
-    );
-
+  const resultsArea = document.getElementById("results-area");
 
   let totalResponses = 0;
-
   let numbersWithResponses = 0;
-
 
   data.forEach(item => {
 
-    totalResponses +=
-      Number(
-        item.response_count || 0
-      );
+    totalResponses += Number(item.response_count || 0);
 
-
-    if(
-      Number(
-        item.response_count || 0
-      ) > 0
-    ){
-
+    if(Number(item.response_count || 0) > 0){
       numbersWithResponses++;
-
     }
 
   });
 
-
-  document.getElementById(
-    "answered-summary"
-  ).textContent =
+  document.getElementById("answered-summary").textContent =
     `${numbersWithResponses} / ${data.length}`;
 
+  document.getElementById("response-total").textContent = totalResponses;
 
-  document.getElementById(
-    "response-total"
-  ).textContent =
-    totalResponses;
-
-
-  resultsArea.innerHTML =
-    data
-      .map(
-        item =>
-          createNumberCard(item)
-      )
-      .join("");
-
+  resultsArea.innerHTML = data.map(item => createNumberCard(item)).join("");
 
   /* 開閉処理 */
 
-  document
-    .querySelectorAll(
-      ".number-header"
-    )
-    .forEach(header => {
+  document.querySelectorAll(".number-header").forEach(header => {
 
-      header.addEventListener(
-        "click",
-        () => {
+    header.addEventListener("click", () => {
 
-          const targetId =
-            header.dataset.target;
+      const target = document.getElementById(header.dataset.target);
 
-          const target =
-            document.getElementById(
-              targetId
-            );
+      if(!target){ return; }
 
+      const arrow = header.querySelector(".arrow");
 
-          const arrow =
-            header.querySelector(
-              ".arrow"
-            );
+      target.classList.toggle("open");
 
-
-          target.classList.toggle(
-            "open"
-          );
-
-
-          arrow.textContent =
-            target.classList.contains(
-              "open"
-            )
-              ? "▲"
-              : "▼";
-
-        }
-      );
+      arrow.textContent =
+        target.classList.contains("open") ? "▲" : "▼";
 
     });
+
+  });
 
 }
 
 
-/* ============================================================
- * 番号カード生成
- * ============================================================ */
+/* 番号カード生成 */
 
 function createNumberCard(item){
 
-  const number =
-    item.number;
+  const number = item.number;
+  const assigned = Number(item.assigned_count || 0);
+  const responseCount = Number(item.response_count || 0);
+  const complete = assigned > 0 && responseCount >= assigned;
+  const statusClass = complete ? "complete" : "incomplete";
 
+  /* 本人が選んだ部分 */
 
-  const assigned =
-    Number(
-      item.assigned_count || 0
-    );
-
-
-  const responseCount =
-    Number(
-      item.response_count || 0
-    );
-
-
-  const complete =
-    assigned > 0 &&
-    responseCount >= assigned;
-
-
-  const statusClass =
-    complete
-      ? "complete"
-      : "incomplete";
-
+  const picked = selectionsByNumber[number] || [];
 
   const statusText =
-    assigned === 0
-
+    (assigned === 0
       ? "まだ割り当てなし"
+      : `${responseCount} / ${assigned} 回答済み`)
+    + (picked.length > 0 ? `　／　選択 ${picked.length}か所` : "");
 
-      : `${responseCount} / ${assigned} 回答済み`;
-
-
-  const responses =
-    Array.isArray(
-      item.responses
-    )
-      ? item.responses
-      : [];
-
+  const responses = Array.isArray(item.responses) ? item.responses : [];
 
   const responseHtml =
     responses.length === 0
+      ? `<div class="no-response">まだ回答はありません。</div>`
+      : responses.map((response, index) => createResponseHtml(response, index)).join("");
 
-      ?
-
-      `
-
-        <div class="no-response">
-          まだ回答はありません。
-        </div>
-
-      `
-
-      :
-
-      responses
-        .map(
-          (response,index) =>
-            createResponseHtml(
-              response,
-              index
-            )
-        )
-        .join("");
-
+  const pickedHtml =
+    selectionsFailed
+      ? `<div class="error">選ばれた部分の取得に失敗しました。</div>`
+      : picked.length === 0
+        ? ""
+        : `
+          <div class="picked">
+            <div class="picked-title">本人が選んだ部分（${picked.length}か所）</div>
+            ${picked.map(r => `
+              <div class="picked-item">
+                <span class="picked-field">${escapeHtml(FIELD_LABELS[r.field] || r.field)}</span>
+                <mark>${escapeHtml(r.phrase)}</mark>
+              </div>
+            `).join("")}
+          </div>
+        `;
 
   return `
 
     <section class="number-card">
 
-
-      <div
-        class="number-header"
-        data-target="responses-${number}"
-      >
-
+      <div class="number-header" data-target="responses-${number}">
 
         <div class="number-title">
-
-
-          <span class="number-badge">
-            ${number}番
-          </span>
-
-
-          <span
-            class="number-status ${statusClass}"
-          >
-            ${statusText}
-          </span>
-
-
+          <span class="number-badge">${number}番</span>
+          <span class="number-status ${statusClass}">${escapeHtml(statusText)}</span>
         </div>
 
-
-        <span class="arrow">
-          ▼
-        </span>
-
+        <span class="arrow">▼</span>
 
       </div>
 
-
-      <div
-        class="responses"
-        id="responses-${number}"
-      >
-
+      <div class="responses" id="responses-${number}">
+        ${pickedHtml}
         ${responseHtml}
-
       </div>
-
 
     </section>
 
@@ -1274,88 +421,37 @@ function createNumberCard(item){
 }
 
 
-/* ============================================================
- * 回答1件を生成
- * ============================================================ */
+/* 回答1件を生成 */
 
-function createResponseHtml(
-  response,
-  index
-){
+function createResponseHtml(response, index){
 
-  const answers =
-    response.answers || {};
+  const answers = response.answers || {};
 
-
-  const impression =
-    escapeHtml(
-      answers.impression || ""
-    );
-
-
-  const goodpoint =
-    escapeHtml(
-      answers.goodpoint || ""
-    );
-
-
-  const message =
-    escapeHtml(
-      answers.message || ""
-    );
-
+  const impression = escapeHtml(answers.impression || "");
+  const goodpoint = escapeHtml(answers.goodpoint || "");
+  const message = escapeHtml(answers.message || "");
 
   const submittedAt =
     response.submitted_at
-      ? new Date(
-          response.submitted_at
-        ).toLocaleString(
-          "ja-JP"
-        )
+      ? new Date(response.submitted_at).toLocaleString("ja-JP")
       : "";
-
 
   return `
 
     <article class="response">
 
+      <div class="response-number">回答 ${index + 1}</div>
 
-      <div class="response-number">
-        回答 ${index + 1}
-      </div>
+      <div class="question">この人の印象</div>
+      <div class="answer">${impression || "（回答なし）"}</div>
 
+      <div class="question">良いところ・すごいと思うところ</div>
+      <div class="answer">${goodpoint || "（回答なし）"}</div>
 
-      <div class="question">
-        この人の印象
-      </div>
+      <div class="question">一言メッセージ</div>
+      <div class="answer">${message || "（回答なし）"}</div>
 
-      <div class="answer">
-        ${impression || "（回答なし）"}
-      </div>
-
-
-      <div class="question">
-        良いところ・すごいと思うところ
-      </div>
-
-      <div class="answer">
-        ${goodpoint || "（回答なし）"}
-      </div>
-
-
-      <div class="question">
-        一言メッセージ
-      </div>
-
-      <div class="answer">
-        ${message || "（回答なし）"}
-      </div>
-
-
-      <div class="date">
-        送信日時：${submittedAt}
-      </div>
-
+      <div class="date">送信日時：${submittedAt}</div>
 
     </article>
 
@@ -1364,98 +460,40 @@ function createResponseHtml(
 }
 
 
-/* ============================================================
- * HTMLエスケープ
- *
- * 回答内容をそのままHTMLとして解釈させないための処理
- * ============================================================ */
+/* HTMLエスケープ（回答内容をそのままHTMLとして解釈させないための処理） */
 
 function escapeHtml(value){
 
   return String(value)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 }
 
 
-/* ============================================================
- * ボタン
- * ============================================================ */
+/* ボタン */
 
-document
-  .getElementById(
-    "login-button"
-  )
-  .addEventListener(
-    "click",
-    login
-  );
+document.getElementById("login-button").addEventListener("click", login);
 
-
-document
-  .getElementById(
-    "refresh-button"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      loadResults();
-      loadSubmissionStatus();
-
-    }
-  );
-
+document.getElementById("refresh-button").addEventListener("click", () => {
+  loadResults();
+  loadSubmissionStatus();
+});
 
 /* Enterキー */
 
-document
-  .getElementById(
-    "admin-password"
-  )
-  .addEventListener(
-    "keydown",
-    (e) => {
+document.getElementById("admin-password").addEventListener("keydown", (e) => {
 
-      if(e.key === "Enter"){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    login();
+  }
 
-        e.preventDefault();
-
-        login();
-
-      }
-
-    }
-  );
-
+});
 
 </script>
-
-
 </body>
-
 </html>
